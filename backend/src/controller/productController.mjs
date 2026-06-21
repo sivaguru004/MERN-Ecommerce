@@ -1,4 +1,5 @@
 import Product from "../models/productModel.mjs"
+import ApiFunctionality from "../utils/apiFunctionality.mjs";
 
 // create Product
 export const createProduct = async(req, res)=>{
@@ -19,8 +20,17 @@ export const createProduct = async(req, res)=>{
 
 // get all products
 export const getAllProducts = async(req, res)=>{
-    const products = await Product.find();
+    try{
+    const apiFunctionality = new ApiFunctionality(Product.find(), req.query).search().filter();
+    const products = await apiFunctionality.query
+
     res.status(200).send({success:true, products})
+    }catch(err){
+        if(err.name==='CastError'){
+            return res.status(404).send({success:false, msg:`This is invalid resource ${err.path}`})
+        }
+        res.status(500).send({success:false, msg:err.message})
+    }
 }
 
 // update product
