@@ -21,10 +21,26 @@ export const createProduct = async(req, res)=>{
 // get all products
 export const getAllProducts = async(req, res)=>{
     try{
-    const apiFunctionality = new ApiFunctionality(Product.find(), req.query).search().filter();
-    const products = await apiFunctionality.query
+        const apiFunctionality = new ApiFunctionality(Product.find(), req.query)
+        .search().filter();
 
-    res.status(200).send({success:true, products})
+        // counting Products for pagination
+        const resultPerPage = 1
+        const filteredQuery = apiFunctionality.query.clone();
+        const productCount = await filteredQuery.countDocuments();
+        const totalPage = Math.ceil(productCount/resultPerPage);
+
+        const page = Number(req.query.page) || 1;
+
+        if(totalPage>0 && page>totalPage){
+            return res.status(404).send({success: false, msg:"This Page doesn't Exist"})
+        }
+
+        apiFunctionality.pagination(resultPerPage)
+
+        const products = await apiFunctionality.query
+
+        res.status(200).send({success:true, products, productCount, totalPage, resultPerPage, currentPage:page})
     }catch(err){
         if(err.name==='CastError'){
             return res.status(404).send({success:false, msg:`This is invalid resource ${err.path}`})

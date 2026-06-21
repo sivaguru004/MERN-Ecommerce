@@ -32,7 +32,16 @@ class ApiFunctionality {
         this.query = this.query.find(qCopy)
 
         return this
+    }
+
+    pagination(resultPerPage){
+        const currentPage = Number(this.queryStr.page) || 1;
+        const skip = resultPerPage*(currentPage-1)
+
+        this.query = this.query.limit(resultPerPage).skip(skip)
         
+        return this
+
     }
 }
 
