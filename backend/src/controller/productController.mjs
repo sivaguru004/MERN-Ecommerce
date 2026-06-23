@@ -40,6 +40,10 @@ export const getAllProducts = async(req, res)=>{
 
         const products = await apiFunctionality.query
 
+        if (!products || products.length===0){
+            return res.status(404)
+        }
+
         res.status(200).send({success:true, products, productCount, totalPage, resultPerPage, currentPage:page})
     }catch(err){
         if(err.name==='CastError'){
